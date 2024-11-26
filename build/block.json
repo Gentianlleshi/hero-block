@@ -1,0 +1,179 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "create-block/hero-block",
+  "version": "0.1.0",
+  "title": "Hero Block",
+  "category": "widgets",
+  "icon": "smiley",
+  "description": "Example block scaffolded with Create Block tool.",
+  "example": {},
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "layout": {
+      "type": "string",
+      "default": "block"
+    },
+    "columns": {
+      "type": "number",
+      "default": 1
+    },
+    "columnsLaptop": {
+      "type": "number"
+    },
+    "columnsTablet": {
+      "type": "number"
+    },
+    "columnsMobile": {
+      "type": "number"
+    },
+    "justifyContent": {
+      "type": "string",
+      "default": "flex-start"
+    },
+    "alignItems": {
+      "type": "string",
+      "default": "stretch"
+    },
+    "flexWrap": {
+      "type": "string",
+      "default": "nowrap"
+    },
+    "flexWrapTablet": {
+      "type": "string",
+      "default": "nowrap"
+    },
+    "flexWrapMobile": {
+      "type": "string",
+      "default": "nowrap"
+    },
+    "placeContent": {
+      "type": "string",
+      "default": "normal"
+    },
+    "gap": {
+      "type": "number",
+      "default": 0
+    },
+    "gapUnit": {
+      "type": "string",
+      "default": "px"
+    },
+    "flexDirection": {
+      "type": "string",
+      "default": "row"
+    },
+    "backgroundImage": {
+      "type": "string",
+      "default": ""
+    },
+    "gradientColors": {
+      "type": "array",
+      "default": [
+        "#000000",
+        "#000000",
+        "#000000"
+      ]
+    },
+    "gradientAngle": {
+      "type": "number",
+      "default": 0
+    },
+    "backgroundImageZIndex": {
+      "type": "number",
+      "default": -1
+    },
+    "gradientZIndex": {
+      "type": "number",
+      "default": -1
+    },
+    "enableBackgroundImage": {
+      "type": "boolean",
+      "default": false
+    },
+    "enableBackgroundGradient": {
+      "type": "boolean",
+      "default": false
+    },
+    "backgroundSize": {
+      "type": "string",
+      "default": "cover"
+    },
+    "backgroundPosition": {
+      "type": "string",
+      "default": "center center"
+    },
+    "backgroundRepeat": {
+      "type": "string",
+      "default": "no-repeat"
+    },
+    "uniqueClass": {
+      "type": "string",
+      "default": ""
+    },
+    "height": {
+      "type": "string",
+      "default": ""
+    },
+    "minHeight": {
+      "type": "string",
+      "default": ""
+    },
+    "maxHeight": {
+      "type": "string",
+      "default": ""
+    },
+    "width": {
+      "type": "string",
+      "default": ""
+    },
+    "minWidth": {
+      "type": "string",
+      "default": ""
+    },
+    "maxWidth": {
+      "type": "string",
+      "default": ""
+    },
+    "paddingTop": {
+      "type": "string",
+      "default": ""
+    },
+    "paddingRight": {
+      "type": "string",
+      "default": ""
+    },
+    "paddingBottom": {
+      "type": "string",
+      "default": ""
+    },
+    "paddingLeft": {
+      "type": "string",
+      "default": ""
+    },
+    "marginTop": {
+      "type": "string",
+      "default": ""
+    },
+    "marginRight": {
+      "type": "string",
+      "default": ""
+    },
+    "marginBottom": {
+      "type": "string",
+      "default": ""
+    },
+    "marginLeft": {
+      "type": "string",
+      "default": ""
+    }
+  },
+  "textdomain": "hero-block",
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./index.css",
+  "style": "file:./style-index.css",
+  "render": "file:./render.php",
+  "viewScript": "file:./view.js"
+}

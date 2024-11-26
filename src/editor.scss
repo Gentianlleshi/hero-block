@@ -1,0 +1,45 @@
+/* editor.scss */
+.wp-block-create-block-hero-block {
+	// min-height: 20%;
+	min-width: 50%;
+	border: 1px dashed #cccccc;
+}
+
+.hero-block.has-background-image,
+.hero-block.has-background-gradient {
+	position: relative;
+}
+
+.hero-block.has-background-image::before,
+.hero-block.has-background-gradient::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+/* Background Image Styles */
+.hero-block.has-background-image::before {
+	background-image: var(--background-image, none);
+	background-size: var(--background-size, cover);
+	background-position: var(--background-position, center center);
+	background-repeat: var(--background-repeat, no-repeat);
+	z-index: var(--background-image-z-index, -1);
+}
+
+/* Background Gradient Styles */
+.hero-block.has-background-gradient::after {
+	background-image: var(--gradient, none);
+	background-size: cover;
+	background-position: center center;
+	background-repeat: no-repeat;
+	z-index: var(--gradient-z-index, -1);
+}
+
+/* Ensure the content is above the backgrounds */
+.hero-block > * {
+	position: relative;
+	z-index: 0;
+}
