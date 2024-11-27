@@ -37,18 +37,6 @@
       "type": "string",
       "default": "stretch"
     },
-    "flexWrap": {
-      "type": "string",
-      "default": "nowrap"
-    },
-    "flexWrapTablet": {
-      "type": "string",
-      "default": "nowrap"
-    },
-    "flexWrapMobile": {
-      "type": "string",
-      "default": "nowrap"
-    },
     "placeContent": {
       "type": "string",
       "default": "normal"
