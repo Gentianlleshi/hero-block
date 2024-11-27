@@ -6,18 +6,12 @@ function render_hero_block($attributes, $content)
 	// Extract attributes with defaults
 	$layout = $attributes['layout'] ?? 'block';
 	$columns = $attributes['columns'] ?? 1;
-	$columnsLaptop = $attributes['columnsLaptop'] ?? $columns;
-	$columnsTablet = $attributes['columnsTablet'] ?? $columnsLaptop;
-	$columnsMobile = $attributes['columnsMobile'] ?? $columnsTablet;
 	$justifyContent = $attributes['justifyContent'] ?? 'flex-start';
 	$alignItems = $attributes['alignItems'] ?? 'stretch';
 	$placeContent = $attributes['placeContent'] ?? 'normal';
 	$gap = isset($attributes['gap']) ? $attributes['gap'] : 0;
 	$gapUnit = isset($attributes['gapUnit']) ? $attributes['gapUnit'] : 'px';
 	$flexDirection = $attributes['flexDirection'] ?? 'row';
-	$flexWrap = isset($attributes['flexWrap']) ? $attributes['flexWrap'] : 'nowrap';
-	$flexWrapTablet = isset($attributes['flexWrapTablet']) ? $attributes['flexWrapTablet'] : $flexWrap;
-	$flexWrapMobile = isset($attributes['flexWrapMobile']) ? $attributes['flexWrapMobile'] : $flexWrap;
 
 	// Background attributes
 	$backgroundImage = $attributes['backgroundImage'] ?? '';
@@ -51,7 +45,7 @@ function render_hero_block($attributes, $content)
 	$style = "display: {$layout};";
 
 	if ($layout === 'flex') {
-		$style .= " justify-content: {$justifyContent}; align-items: {$alignItems}; flex-direction: {$flexDirection}; flex-wrap: {$flexWrap};";
+		$style .= " justify-content: {$justifyContent}; align-items: {$alignItems}; flex-direction: {$flexDirection};";
 	} elseif ($layout === 'grid') {
 		$style .= " grid-template-columns: repeat({$columns}, 1fr); place-content: {$placeContent};";
 	}
@@ -121,8 +115,7 @@ function render_hero_block($attributes, $content)
 	}
 
 	if ($hasBackgroundGradient && !empty($gradientColors) && is_array($gradientColors)) {
-		$escaped_colors = array_map('esc_attr', $gradientColors);
-		$gradient = 'linear-gradient(' . intval($gradientAngle) . 'deg, ' . implode(', ', $escaped_colors) . ')';
+		$gradient = 'linear-gradient(' . intval($gradientAngle) . 'deg, ' . implode(', ', array_map('esc_attr', $gradientColors)) . ')';
 		$style .= "--gradient: {$gradient};";
 		$style .= "--gradient-z-index: {$gradientZIndex};";
 	}
@@ -138,61 +131,10 @@ function render_hero_block($attributes, $content)
 		$class_name .= ' has-background-gradient';
 	}
 
-	// Build responsive flex-wrap styles
-	$baseStyles = "
-		.{$uniqueClass} {
-			display: {$layout};
-			" . ($layout === 'grid' ? "grid-template-columns: repeat({$columns}, 1fr);" : "") . "
-			" . ($layout === 'grid' ? "grid-auto-rows: 1fr;" : "") . "
-			" . ($layout === 'grid' && $placeContent ? "place-content: {$placeContent};" : "") . "
-			" . ($layout === 'flex' ? "flex-wrap: {$flexWrap};" : "") . "
-		}
-	";
-
-	$laptopStyles = $columnsLaptop || ($layout === 'flex' && $flexWrapTablet !== 'nowrap')
-		? "
-			@media (min-width: 1025px) and (max-width: 1440px) {
-				.{$uniqueClass} {
-					" . ($layout === 'grid' ? "grid-template-columns: repeat({$columnsLaptop}, 1fr) !important;" : "") . "
-					" . ($layout === 'flex' && $flexWrapTablet ? "flex-wrap: {$flexWrapTablet} !important;" : "") . "
-				}
-			}
-		"
-		: "";
-
-	$tabletStyles = $columnsTablet || ($layout === 'flex' && $flexWrapTablet !== 'nowrap')
-		? "
-			@media (max-width: 1024px) and (min-width: 768px) {
-				.{$uniqueClass} {
-					" . ($layout === 'grid' ? "grid-template-columns: repeat({$columnsTablet}, 1fr) !important;" : "") . "
-					" . ($layout === 'flex' && $flexWrapTablet ? "flex-wrap: {$flexWrapTablet} !important;" : "") . "
-				}
-			}
-		"
-		: "";
-
-	$mobileStyles = $columnsMobile || ($layout === 'flex' && $flexWrapMobile !== 'nowrap')
-		? "
-			@media (max-width: 767px) {
-				.{$uniqueClass} {
-					" . ($layout === 'grid' ? "grid-template-columns: repeat({$columnsMobile}, 1fr) !important;" : "") . "
-					" . ($layout === 'flex' && $flexWrapMobile ? "flex-wrap: {$flexWrapMobile} !important;" : "") . "
-				}
-			}
-		"
-		: "";
-
-	$allStyles = $baseStyles . $laptopStyles . $tabletStyles . $mobileStyles;
-
-	// Output the block
-	return "
-		<style>{$allStyles}</style>
-		<div class=\"" . esc_attr($class_name) . "\" style=\"" . esc_attr($style) . "\">
-			" . $content . "
-		</div>
-	";
+	return sprintf(
+		'<div class="%1$s" style="%2$s">%3$s</div>',
+		esc_attr($class_name),
+		esc_attr($style),
+		$content
+	);
 }
-
-register_block_type(__DIR__, array(
-	'render_callback' => 'render_hero_block',
-));
