@@ -60,3 +60,15 @@ function enqueue_extend_text_blocks_script()
 	);
 }
 add_action('enqueue_block_editor_assets', 'enqueue_extend_text_blocks_script');
+
+
+
+/**
+ * Enqueue animate.js framework for the blocks
+ */
+function my_custom_plugin_enqueue_styles()
+{
+	wp_enqueue_style('animate-css', 'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css', array(), '4.1.1');
+}
+add_action('enqueue_block_editor_assets', 'my_custom_plugin_enqueue_styles');
+add_action('wp_enqueue_scripts', 'my_custom_plugin_enqueue_styles');
