@@ -1,3 +1,4 @@
+// extend-button-block.js
 (function (wp) {
 	const { addFilter } = wp.hooks;
 	const { createHigherOrderComponent } = wp.compose;
@@ -8,6 +9,8 @@
 		RangeControl,
 		SelectControl,
 		ColorPicker,
+		ToggleControl,
+		TextControl,
 		__experimentalUnitControl: UnitControl, // For line-height
 	} = wp.components;
 
@@ -28,13 +31,40 @@
 			boxShadowType: { type: "string", default: "outline" },
 			boxShadowOffsetX: { type: "number", default: 0 },
 			boxShadowOffsetY: { type: "number", default: 0 },
-			boxShadowBlur: { type: "number", default: 5 },
+			boxShadowBlur: { type: "number", default: 0 },
 			boxShadowSpread: { type: "number", default: 0 },
 			boxShadowColor: { type: "string", default: "#000000" },
 			boxShadowOpacity: { type: "number", default: 100 },
 			// New attributes
 			fontWeight: { type: "string", default: "normal" },
 			lineHeight: { type: "string", default: "normal" },
+			// Animation Attributes
+			enableAnimation: { type: "boolean", default: false },
+			animationType: { type: "string", default: "" },
+			animationDuration: { type: "number", default: 1000 },
+			animationDelay: { type: "number", default: 0 },
+			animationEasing: { type: "string", default: "ease" },
+			animationOnce: { type: "boolean", default: true },
+			// Animation Properties
+			animateOpacity: { type: "boolean", default: false },
+			opacityFrom: { type: "number", default: 1 },
+			opacityTo: { type: "number", default: 1 },
+
+			animateX: { type: "boolean", default: false },
+			xFrom: { type: "string", default: "0" },
+			xTo: { type: "string", default: "0" },
+
+			animateY: { type: "boolean", default: false },
+			yFrom: { type: "string", default: "0" },
+			yTo: { type: "string", default: "0" },
+
+			animateScale: { type: "boolean", default: false },
+			scaleFrom: { type: "number", default: 1 },
+			scaleTo: { type: "number", default: 1 },
+
+			animateRotation: { type: "boolean", default: false },
+			rotationFrom: { type: "number", default: 0 },
+			rotationTo: { type: "number", default: 0 },
 		};
 
 		// Merge new attributes with existing ones
@@ -74,6 +104,28 @@
 				boxShadowOpacity,
 				fontWeight,
 				lineHeight,
+				enableAnimation,
+				animationType,
+				animationDuration,
+				animationDelay,
+				animationEasing,
+				animationOnce,
+				// New animation properties
+				animateOpacity,
+				opacityFrom,
+				opacityTo,
+				animateX,
+				xFrom,
+				xTo,
+				animateY,
+				yFrom,
+				yTo,
+				animateScale,
+				scaleFrom,
+				scaleTo,
+				animateRotation,
+				rotationFrom,
+				rotationTo,
 			} = attributes;
 
 			// Ensure uniqueId is set
@@ -221,6 +273,228 @@
 								max: 100,
 							}),
 						),
+						// Animation Panel
+						wp.element.createElement(
+							PanelBody,
+							{ title: "Animation", initialOpen: false },
+							// Toggle to enable or disable animations
+							wp.element.createElement(ToggleControl, {
+								label: "Enable Animation",
+								checked: enableAnimation,
+								onChange: (value) => {
+									setAttributes({ enableAnimation: value });
+									if (!value) {
+										// Reset animation attributes when disabling animations
+										setAttributes({
+											// Reset main animation settings
+											animationDuration: 1000,
+											animationDelay: 0,
+											animationEasing: "ease",
+											animationOnce: true,
+											// Reset animation properties
+											animateOpacity: false,
+											opacityFrom: 0,
+											opacityTo: 1,
+											animateX: false,
+											xFrom: "0",
+											xTo: "0",
+											animateY: false,
+											yFrom: "0",
+											yTo: "0",
+											animateScale: false,
+											scaleFrom: 1,
+											scaleTo: 1,
+											animateRotation: false,
+											rotationFrom: 0,
+											rotationTo: 0,
+										});
+									}
+								},
+							}),
+							// Conditionally render animation controls
+							enableAnimation &&
+								wp.element.createElement(
+									Fragment,
+									null,
+									wp.element.createElement(RangeControl, {
+										label: "Animation Duration (ms)",
+										value: animationDuration,
+										onChange: (value) =>
+											setAttributes({ animationDuration: value }),
+										min: 100,
+										max: 5000,
+										step: 100,
+										help: "Duration of the animation in milliseconds",
+									}),
+									wp.element.createElement(RangeControl, {
+										label: "Animation Delay (ms)",
+										value: animationDelay,
+										onChange: (value) =>
+											setAttributes({ animationDelay: value }),
+										min: 0,
+										max: 5000,
+										step: 100,
+										help: "Delay before the animation starts in milliseconds",
+									}),
+									wp.element.createElement(SelectControl, {
+										label: "Animation Easing",
+										value: animationEasing,
+										options: [
+											{ label: "Ease", value: "ease" },
+											{ label: "Ease-In", value: "ease-in" },
+											{ label: "Ease-Out", value: "ease-out" },
+											{ label: "Ease-In-Out", value: "ease-in-out" },
+											{ label: "Linear", value: "linear" },
+										],
+										onChange: (value) =>
+											setAttributes({ animationEasing: value }),
+									}),
+									wp.element.createElement(ToggleControl, {
+										label: "Animate Only Once",
+										checked: animationOnce,
+										onChange: (value) =>
+											setAttributes({ animationOnce: value }),
+										help: "If enabled, the animation will occur only once when the element enters the viewport.",
+									}),
+									// Animation Properties
+									wp.element.createElement(
+										PanelBody,
+										{ title: "Animation Properties", initialOpen: false },
+										// Animate Opacity
+										wp.element.createElement(ToggleControl, {
+											label: "Animate Opacity",
+											checked: animateOpacity,
+											onChange: (value) =>
+												setAttributes({ animateOpacity: value }),
+										}),
+										animateOpacity &&
+											wp.element.createElement(
+												Fragment,
+												null,
+												wp.element.createElement(RangeControl, {
+													label: "From Opacity",
+													value: opacityFrom,
+													onChange: (value) =>
+														setAttributes({ opacityFrom: value }),
+													min: 0,
+													max: 1,
+													step: 0.1,
+												}),
+												wp.element.createElement(RangeControl, {
+													label: "To Opacity",
+													value: opacityTo,
+													onChange: (value) =>
+														setAttributes({ opacityTo: value }),
+													min: 0,
+													max: 1,
+													step: 0.1,
+												}),
+											),
+										// Animate X
+										wp.element.createElement(ToggleControl, {
+											label: "Animate X",
+											checked: animateX,
+											onChange: (value) => setAttributes({ animateX: value }),
+										}),
+										animateX &&
+											wp.element.createElement(
+												Fragment,
+												null,
+												wp.element.createElement(TextControl, {
+													label: "From X (e.g., -100, 0%)",
+													value: xFrom,
+													onChange: (value) => setAttributes({ xFrom: value }),
+												}),
+												wp.element.createElement(TextControl, {
+													label: "To X (e.g., 0, 100%)",
+													value: xTo,
+													onChange: (value) => setAttributes({ xTo: value }),
+												}),
+											),
+										// Animate Y
+										wp.element.createElement(ToggleControl, {
+											label: "Animate Y",
+											checked: animateY,
+											onChange: (value) => setAttributes({ animateY: value }),
+										}),
+										animateY &&
+											wp.element.createElement(
+												Fragment,
+												null,
+												wp.element.createElement(TextControl, {
+													label: "From Y (e.g., -100, 0%)",
+													value: yFrom,
+													onChange: (value) => setAttributes({ yFrom: value }),
+												}),
+												wp.element.createElement(TextControl, {
+													label: "To Y (e.g., 0, 100%)",
+													value: yTo,
+													onChange: (value) => setAttributes({ yTo: value }),
+												}),
+											),
+										// Animate Scale
+										wp.element.createElement(ToggleControl, {
+											label: "Animate Scale",
+											checked: animateScale,
+											onChange: (value) =>
+												setAttributes({ animateScale: value }),
+										}),
+										animateScale &&
+											wp.element.createElement(
+												Fragment,
+												null,
+												wp.element.createElement(RangeControl, {
+													label: "From Scale",
+													value: scaleFrom,
+													onChange: (value) =>
+														setAttributes({ scaleFrom: value }),
+													min: 0,
+													max: 3,
+													step: 0.1,
+												}),
+												wp.element.createElement(RangeControl, {
+													label: "To Scale",
+													value: scaleTo,
+													onChange: (value) =>
+														setAttributes({ scaleTo: value }),
+													min: 0,
+													max: 3,
+													step: 0.1,
+												}),
+											),
+										// Animate Rotation
+										wp.element.createElement(ToggleControl, {
+											label: "Animate Rotation",
+											checked: animateRotation,
+											onChange: (value) =>
+												setAttributes({ animateRotation: value }),
+										}),
+										animateRotation &&
+											wp.element.createElement(
+												Fragment,
+												null,
+												wp.element.createElement(RangeControl, {
+													label: "From Rotation (degrees)",
+													value: rotationFrom,
+													onChange: (value) =>
+														setAttributes({ rotationFrom: value }),
+													min: -360,
+													max: 360,
+													step: 1,
+												}),
+												wp.element.createElement(RangeControl, {
+													label: "To Rotation (degrees)",
+													value: rotationTo,
+													onChange: (value) =>
+														setAttributes({ rotationTo: value }),
+													min: -360,
+													max: 360,
+													step: 1,
+												}),
+											),
+									),
+								),
+						),
 					),
 			);
 		};
@@ -240,7 +514,7 @@
 			}
 
 			const { attributes } = props.block;
-			const { uniqueId } = attributes;
+			const { uniqueId, enableAnimation } = attributes;
 
 			// Generate unique class
 			const uniqueClass = `custom-button-${uniqueId || props.block.clientId}`;
@@ -256,6 +530,11 @@
 				...props,
 				className: [props.className, uniqueClass].filter(Boolean).join(" "),
 			};
+
+			// If animation is enabled, add class to identify elements to animate
+			if (enableAnimation) {
+				blockProps.className += " gsap-animate-element";
+			}
 
 			return wp.element.createElement(BlockListBlock, blockProps);
 		};
@@ -273,7 +552,32 @@
 			return element;
 		}
 
-		const { uniqueId } = attributes;
+		const {
+			uniqueId,
+			enableAnimation,
+			animationType,
+			animationDuration,
+			animationDelay,
+			animationEasing,
+			animationOnce,
+			// Animation properties
+			animateOpacity,
+			opacityFrom,
+			opacityTo,
+			animateX,
+			xFrom,
+			xTo,
+			animateY,
+			yFrom,
+			yTo,
+			animateScale,
+			scaleFrom,
+			scaleTo,
+			animateRotation,
+			rotationFrom,
+			rotationTo,
+		} = attributes;
+
 		const uniqueClass = `custom-button-${uniqueId}`;
 
 		// Add unique class to the button
@@ -283,6 +587,67 @@
 				.filter(Boolean)
 				.join(" "),
 		};
+
+		// Add data attributes for GSAP if animation is enabled
+		// Clone the inner <a> element to add data attributes and class
+		let innerElement = element.props.children;
+
+		if (enableAnimation && innerElement && innerElement.props) {
+			let innerProps = { ...innerElement.props };
+
+			let animationProperties = {};
+
+			let fromVars = {};
+			let toVars = {};
+
+			if (animateOpacity) {
+				fromVars.opacity = parseFloat(opacityFrom);
+				toVars.opacity = parseFloat(opacityTo);
+			}
+
+			if (animateX) {
+				fromVars.x = xFrom;
+				toVars.x = xTo;
+			}
+
+			if (animateY) {
+				fromVars.y = yFrom;
+				toVars.y = yTo;
+			}
+
+			if (animateScale) {
+				fromVars.scale = parseFloat(scaleFrom);
+				toVars.scale = parseFloat(scaleTo);
+			}
+
+			if (animateRotation) {
+				fromVars.rotation = parseFloat(rotationFrom);
+				toVars.rotation = parseFloat(rotationTo);
+			}
+
+			animationProperties.fromVars = fromVars;
+			animationProperties.toVars = toVars;
+
+			// Store as JSON string in data attribute
+			innerProps["data-animation-properties"] =
+				JSON.stringify(animationProperties);
+
+			// Include other animation settings
+			innerProps["data-animation-duration"] = animationDuration;
+			innerProps["data-animation-delay"] = animationDelay;
+			innerProps["data-animation-easing"] = animationEasing;
+			innerProps["data-animation-once"] = animationOnce ? "true" : "false";
+
+			// Add class to identify elements to animate
+			innerProps.className =
+				(innerProps.className || "") + " gsap-animate-element";
+
+			// Clone the inner element with new props
+			innerElement = wp.element.cloneElement(innerElement, innerProps);
+		}
+
+		// Clone the outer element with new props and updated children
+		const newElement = wp.element.cloneElement(element, newProps, innerElement);
 
 		// Generate styles
 		const styles = generateButtonStyles(uniqueClass, attributes);
@@ -295,10 +660,7 @@
 		);
 
 		// Return element with style tag
-		return wp.element.createElement("div", null, [
-			styleTag,
-			wp.element.cloneElement(element, newProps),
-		]);
+		return wp.element.createElement("div", null, [styleTag, newElement]);
 	}
 
 	addFilter(
@@ -340,15 +702,15 @@
 		}${boxShadowOffsetX}px ${boxShadowOffsetY}px ${boxShadowBlur}px ${boxShadowSpread}px ${rgbaBoxShadowColor}`;
 
 		const styles = `
-      .${uniqueClass} > .wp-block-button__link {
-        border: ${borderWidth}px solid ${borderColor};
-        border-radius: ${borderRadius}px !important;
-        background-color: ${rgbaBackgroundColor};
-        box-shadow: ${boxShadow};
-        font-weight: ${fontWeight};
-        line-height: ${lineHeight};
-      }
-    `;
+          .${uniqueClass} > .wp-block-button__link {
+            border: ${borderWidth}px solid ${borderColor};
+            border-radius: ${borderRadius}px !important;
+            background-color: ${rgbaBackgroundColor};
+            box-shadow: ${boxShadow};
+            font-weight: ${fontWeight};
+            line-height: ${lineHeight};
+          }
+        `;
 		return styles;
 	}
 

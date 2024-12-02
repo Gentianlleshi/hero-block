@@ -18,6 +18,7 @@
 			fontWeight: { type: "string", default: "normal" },
 			lineHeight: { type: "string", default: "normal" },
 			// Animation Attributes
+			enableAnimation: { type: "boolean", default: false }, // New attribute
 			animationType: { type: "string", default: "" },
 			animationDuration: { type: "number", default: 1000 }, // in ms
 			animationDelay: { type: "number", default: 0 }, // in ms
@@ -37,8 +38,6 @@
 		addTextBlockAttributes,
 	);
 
-	// ... (Continue to Step 2)
-
 	// 2. Add inspector controls
 	const addTextBlockInspectorControls = createHigherOrderComponent(
 		(BlockEdit) => {
@@ -51,6 +50,7 @@
 				const {
 					fontWeight,
 					lineHeight,
+					enableAnimation,
 					animationType,
 					animationDuration,
 					animationDelay,
@@ -102,57 +102,84 @@
 							createElement(
 								PanelBody,
 								{ title: "Animation", initialOpen: false },
-								createElement(SelectControl, {
-									label: "Animation Type",
-									value: animationType,
-									options: [
-										{ label: "None", value: "" },
-										{ label: "Fade In", value: "fade-in" },
-										{ label: "Fade In Up", value: "fade-in-up" },
-										{ label: "Slide In Left", value: "slide-in-left" },
-										{ label: "Slide In Right", value: "slide-in-right" },
-										// Add more animation types as needed
-									],
-									onChange: (value) => setAttributes({ animationType: value }),
-								}),
-								createElement(RangeControl, {
-									label: "Animation Duration (ms)",
-									value: animationDuration,
-									onChange: (value) =>
-										setAttributes({ animationDuration: value }),
-									min: 100,
-									max: 5000,
-									step: 100,
-									help: "Duration of the animation in milliseconds",
-								}),
-								createElement(RangeControl, {
-									label: "Animation Delay (ms)",
-									value: animationDelay,
-									onChange: (value) => setAttributes({ animationDelay: value }),
-									min: 0,
-									max: 5000,
-									step: 100,
-									help: "Delay before the animation starts in milliseconds",
-								}),
-								createElement(SelectControl, {
-									label: "Animation Easing",
-									value: animationEasing,
-									options: [
-										{ label: "Ease", value: "ease" },
-										{ label: "Ease-In", value: "ease-in" },
-										{ label: "Ease-Out", value: "ease-out" },
-										{ label: "Ease-In-Out", value: "ease-in-out" },
-										{ label: "Linear", value: "linear" },
-									],
-									onChange: (value) =>
-										setAttributes({ animationEasing: value }),
-								}),
+								// Toggle to enable or disable animations
 								createElement(ToggleControl, {
-									label: "Animate Only Once",
-									checked: animationOnce,
-									onChange: (value) => setAttributes({ animationOnce: value }),
-									help: "If enabled, the animation will occur only once when the element enters the viewport.",
+									label: "Enable Animation",
+									checked: enableAnimation,
+									onChange: (value) => {
+										setAttributes({ enableAnimation: value });
+										if (!value) {
+											// Reset animation attributes when disabling animations
+											setAttributes({
+												animationType: "",
+												animationDuration: 1000,
+												animationDelay: 0,
+												animationEasing: "ease",
+												animationOnce: true,
+											});
+										}
+									},
 								}),
+								// Conditionally render animation controls
+								enableAnimation &&
+									createElement(
+										Fragment,
+										null,
+										createElement(SelectControl, {
+											label: "Animation Type",
+											value: animationType,
+											options: [
+												{ label: "None", value: "" },
+												{ label: "Fade In", value: "fade-in" },
+												{ label: "Fade In Up", value: "fade-in-up" },
+												{ label: "Slide In Left", value: "slide-in-left" },
+												{ label: "Slide In Right", value: "slide-in-right" },
+												// Add more animation types as needed
+											],
+											onChange: (value) =>
+												setAttributes({ animationType: value }),
+										}),
+										createElement(RangeControl, {
+											label: "Animation Duration (ms)",
+											value: animationDuration,
+											onChange: (value) =>
+												setAttributes({ animationDuration: value }),
+											min: 100,
+											max: 5000,
+											step: 100,
+											help: "Duration of the animation in milliseconds",
+										}),
+										createElement(RangeControl, {
+											label: "Animation Delay (ms)",
+											value: animationDelay,
+											onChange: (value) =>
+												setAttributes({ animationDelay: value }),
+											min: 0,
+											max: 5000,
+											step: 100,
+											help: "Delay before the animation starts in milliseconds",
+										}),
+										createElement(SelectControl, {
+											label: "Animation Easing",
+											value: animationEasing,
+											options: [
+												{ label: "Ease", value: "ease" },
+												{ label: "Ease-In", value: "ease-in" },
+												{ label: "Ease-Out", value: "ease-out" },
+												{ label: "Ease-In-Out", value: "ease-in-out" },
+												{ label: "Linear", value: "linear" },
+											],
+											onChange: (value) =>
+												setAttributes({ animationEasing: value }),
+										}),
+										createElement(ToggleControl, {
+											label: "Animate Only Once",
+											checked: animationOnce,
+											onChange: (value) =>
+												setAttributes({ animationOnce: value }),
+											help: "If enabled, the animation will occur only once when the element enters the viewport.",
+										}),
+									),
 							),
 						),
 				);
@@ -167,7 +194,7 @@
 		addTextBlockInspectorControls,
 	);
 
-	// 3. Modify save content to include custom styles and animation classes
+	// 3. Modify save content to include custom styles and data attributes for GSAP
 	function addTextBlockSaveProps(extraProps, blockType, attributes) {
 		if (
 			blockType.name !== "core/heading" &&
@@ -179,6 +206,7 @@
 		const {
 			fontWeight,
 			lineHeight,
+			enableAnimation,
 			animationType,
 			animationDuration,
 			animationDelay,
@@ -197,92 +225,20 @@
 			newStyle.lineHeight = lineHeight;
 		}
 
-		// Animation Styles
-		if (animationType) {
-			newStyle.animationName = animationType;
-			newStyle.animationDuration = `${animationDuration}ms`;
-			newStyle.animationDelay = `${animationDelay}ms`;
-			newStyle.animationTimingFunction = animationEasing;
-			newStyle.animationFillMode = animationOnce ? "forwards" : "both";
-			newStyle.opacity = animationOnce ? 0 : 1; // Initial opacity for one-time animation
-		}
-
 		// Assign new styles
 		extraProps.style = newStyle;
 
-		// Add animation classes if using CSS classes for animations
-		if (animationType) {
-			extraProps.className = `${extraProps.className} animate-${animationType}`;
-		}
-
-		return extraProps;
-	}
-
-	addFilter(
-		"blocks.getSaveContent.extraProps",
-		"my-custom-plugin/add-text-block-save-props",
-		addTextBlockSaveProps,
-	);
-
-	// Modify the addTextBlockSaveProps to use Animate.css classes
-	function addTextBlockSaveProps(extraProps, blockType, attributes) {
-		if (
-			blockType.name !== "core/heading" &&
-			blockType.name !== "core/paragraph"
-		) {
-			return extraProps;
-		}
-
-		const {
-			fontWeight,
-			lineHeight,
-			animationType,
-			animationDuration,
-			animationDelay,
-			animationEasing,
-			animationOnce,
-		} = attributes;
-
-		// Animation class map for Animate.css
-		const animationClassMap = {
-			"fade-in": "animate__fadeIn",
-			"fade-in-up": "animate__fadeInUp",
-			"slide-in-left": "animate__slideInLeft",
-			"slide-in-right": "animate__slideInRight",
-			// Add more mappings as needed
-		};
-
-		// Build style object
-		let newStyle = extraProps.style || {};
-
-		if (fontWeight && fontWeight !== "normal") {
-			newStyle.fontWeight = fontWeight;
-		}
-
-		if (lineHeight && lineHeight !== "normal") {
-			newStyle.lineHeight = lineHeight;
-		}
-
-		// Animation Styles using Animate.css
-		if (animationType && animationClassMap[animationType]) {
-			// Directly assign CSS custom properties
-			newStyle["animation-duration"] = `${animationDuration}ms`;
-			newStyle["animation-delay"] = `${animationDelay}ms`;
-			newStyle["animation-timing-function"] = animationEasing;
-			newStyle["animation-fill-mode"] = animationOnce ? "forwards" : "both";
-
-			// Optionally, set initial opacity if animationOnce
-			if (animationOnce) {
-				newStyle.opacity = 0;
-			}
-		}
-
-		// Assign new styles
-		extraProps.style = newStyle;
-
-		// Add Animate.css classes
-		if (animationType && animationClassMap[animationType]) {
-			extraProps.className = `${extraProps.className} animate__animated ${animationClassMap[animationType]}`;
+		if (enableAnimation) {
+			// Add data attributes for animations
+			extraProps["data-animation-type"] = animationType;
+			extraProps["data-animation-duration"] = animationDuration;
+			extraProps["data-animation-delay"] = animationDelay;
+			extraProps["data-animation-easing"] = animationEasing;
+			extraProps["data-animation-once"] = animationOnce ? "true" : "false";
+			// Add a class to identify elements to animate
+			extraProps.className = `${
+				extraProps.className || ""
+			} gsap-animate-element`;
 		}
 
 		return extraProps;

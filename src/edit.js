@@ -19,8 +19,6 @@ import {
 } from "@wordpress/components";
 import "./editor.scss";
 
-import { useEffect } from "@wordpress/element";
-
 export default function Edit({ attributes, setAttributes, clientId }) {
 	const {
 		layout,
@@ -60,18 +58,15 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 		marginBottom,
 		marginLeft,
 		flexWrap,
+		flexWrapTablet,
+		flexWrapMobile,
 		flexBasis,
 	} = attributes;
 
 	// Set uniqueClass if not set
-	// if (!uniqueClass) {
-	// 	setAttributes({ uniqueClass: `hero-block-${clientId}` });
-	// }
-	useEffect(() => {
-		if (!uniqueClass) {
-			setAttributes({ uniqueClass: `hero-block-${clientId}` });
-		}
-	}, [uniqueClass, clientId, setAttributes]);
+	if (!uniqueClass) {
+		setAttributes({ uniqueClass: `hero-block-${clientId}` });
+	}
 
 	const hasBackgroundImage = enableBackgroundImage;
 	const hasBackgroundGradient = enableBackgroundGradient;
@@ -85,7 +80,11 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 			flexWrap,
 			"--flex-basis": flexBasis || "auto",
 		}),
-		...(layout !== "block" && {
+		...(layout === "flex" && {
+			"--flex-wrap": flexWrap,
+			gap: `${gap}${gapUnit}`,
+		}),
+		...(layout === "grid" && {
 			gap: `${gap}${gapUnit}`,
 		}),
 		...(hasBackgroundImage && {
@@ -143,50 +142,62 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 
 	// Build styles
 	const baseStyles = `
-    .${uniqueClass} {
-      display: ${layout};
-      ${
-				layout === "grid"
-					? `grid-template-columns: repeat(${columns || 1}, 1fr);`
-					: ""
-			}
-      ${layout === "grid" ? `grid-auto-rows: 1fr;` : ""}
-      ${
-				layout === "grid" && placeContent
-					? `place-content: ${placeContent};`
-					: ""
-			}
-    }
-  `;
+.${uniqueClass} {
+  display: ${layout};
+  ${
+		layout === "grid"
+			? `grid-template-columns: repeat(${columns || 1}, 1fr);`
+			: ""
+	}
+  ${layout === "grid" ? `grid-auto-rows: 1fr;` : ""}
+  ${layout === "grid" && placeContent ? `place-content: ${placeContent};` : ""}
+  ${layout === "flex" ? `flex-wrap: ${flexWrap};` : ""}
+}
+`;
 
 	const laptopStyles = columnsLaptop
 		? `
-      @media (min-width: 1025px) and (max-width: 1440px) {
-        .${uniqueClass} {
-          grid-template-columns: repeat(${columnsLaptop}, 1fr) !important;
-        }
+    @media (min-width: 1025px) and (max-width: 1440px) {
+      .${uniqueClass} {
+        grid-template-columns: repeat(${columnsLaptop}, 1fr) !important;
       }
-    `
+      ${
+				layout === "flex" && flexWrapTablet
+					? `.${uniqueClass} { flex-wrap: ${flexWrapTablet} !important; }`
+					: ""
+			}
+    }
+  `
 		: "";
 
 	const tabletStyles = columnsTablet
 		? `
-      @media (max-width: 1024px) and (min-width: 768px) {
-        .${uniqueClass} {
-          grid-template-columns: repeat(${columnsTablet}, 1fr) !important;
-        }
+    @media (max-width: 1024px) and (min-width: 768px) {
+      .${uniqueClass} {
+        grid-template-columns: repeat(${columnsTablet}, 1fr) !important;
       }
-    `
+      ${
+				layout === "flex" && flexWrapTablet
+					? `.${uniqueClass} { flex-wrap: ${flexWrapTablet} !important; }`
+					: ""
+			}
+    }
+  `
 		: "";
 
 	const mobileStyles = columnsMobile
 		? `
-      @media (max-width: 767px) {
-        .${uniqueClass} {
-          grid-template-columns: repeat(${columnsMobile}, 1fr) !important;
-        }
+    @media (max-width: 767px) {
+      .${uniqueClass} {
+        grid-template-columns: repeat(${columnsMobile}, 1fr) !important;
       }
-    `
+      ${
+				layout === "flex" && flexWrapMobile
+					? `.${uniqueClass} { flex-wrap: ${flexWrapMobile} !important; }`
+					: ""
+			}
+    }
+  `
 		: "";
 
 	const allStyles = baseStyles + laptopStyles + tabletStyles + mobileStyles;
@@ -270,20 +281,6 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 								]}
 								onChange={(value) => setAttributes({ alignItems: value })}
 							/>
-							{/* Flex Wrap Control */}
-							<SelectControl
-								label={__("Flex Wrap", "hero-block")}
-								value={flexWrap}
-								options={[
-									{ label: __("No Wrap", "hero-block"), value: "nowrap" },
-									{ label: __("Wrap", "hero-block"), value: "wrap" },
-									{
-										label: __("Wrap Reverse", "hero-block"),
-										value: "wrap-reverse",
-									},
-								]}
-								onChange={(value) => setAttributes({ flexWrap: value })}
-							/>
 							{/* Flex Basis Control */}
 							<TextControl
 								label={__("Flex Basis", "hero-block")}
@@ -294,6 +291,42 @@ export default function Edit({ attributes, setAttributes, clientId }) {
 									"hero-block",
 								)}
 							/>
+							{/* Responsive Flex Wrap Controls */}
+							<PanelBody
+								title={__("Responsive Flex Wrap", "hero-block")}
+								initialOpen={false}
+							>
+								{/* Flex Wrap for Tablet */}
+								<SelectControl
+									label={__("Flex Wrap (Tablet)", "hero-block")}
+									value={flexWrapTablet}
+									options={[
+										{ label: __("No Wrap", "hero-block"), value: "nowrap" },
+										{ label: __("Wrap", "hero-block"), value: "wrap" },
+										{
+											label: __("Wrap Reverse", "hero-block"),
+											value: "wrap-reverse",
+										},
+										{ label: __("Default", "hero-block"), value: flexWrap },
+									]}
+									onChange={(value) => setAttributes({ flexWrapTablet: value })}
+								/>
+								{/* Flex Wrap for Mobile */}
+								<SelectControl
+									label={__("Flex Wrap (Mobile)", "hero-block")}
+									value={flexWrapMobile}
+									options={[
+										{ label: __("No Wrap", "hero-block"), value: "nowrap" },
+										{ label: __("Wrap", "hero-block"), value: "wrap" },
+										{
+											label: __("Wrap Reverse", "hero-block"),
+											value: "wrap-reverse",
+										},
+										{ label: __("Default", "hero-block"), value: flexWrap },
+									]}
+									onChange={(value) => setAttributes({ flexWrapMobile: value })}
+								/>
+							</PanelBody>
 						</>
 					)}
 					{layout === "grid" && (

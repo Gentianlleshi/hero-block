@@ -31,6 +31,18 @@
 			"type": "string",
 			"default": "stretch"
 		},
+		"flexWrap": {
+			"type": "string",
+			"default": "nowrap"
+		},
+		"flexWrapTablet": {
+			"type": "string",
+			"default": "nowrap"
+		},
+		"flexWrapMobile": {
+			"type": "string",
+			"default": "nowrap"
+		},
 		"placeContent": {
 			"type": "string",
 			"default": "normal"
@@ -146,12 +158,28 @@
 		"marginLeft": {
 			"type": "string",
 			"default": ""
+		},
+		"enableAnimations": {
+			"type": "boolean",
+			"default": false
+		},
+		"animationType": {
+			"type": "string",
+			"default": "fadeIn"
+		},
+		"animationDuration": {
+			"type": "string"
+		},
+		"animationDelay": {
+			"type": "string"
+		},
+		"animationIterationCount": {
+			"type": "string"
 		}
 	},
 	"textdomain": "hero-block",
 	"editorScript": "file:./index.js",
 	"editorStyle": "file:./index.css",
 	"style": "file:./style-index.css",
-	"render": "file:./render.php",
-	"viewScript": "file:./view.js"
+	"render": "file:./render.php"
 }

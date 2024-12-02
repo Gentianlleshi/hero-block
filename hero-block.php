@@ -62,12 +62,19 @@ function enqueue_extend_text_blocks_script()
 add_action('enqueue_block_editor_assets', 'enqueue_extend_text_blocks_script');
 
 
+
 /**
- * Enqueue animate.js framework for the blocks
+ * Enqueue GSAP scripts
  */
-function my_custom_plugin_enqueue_styles()
+function my_custom_plugin_enqueue_scripts()
 {
-	wp_enqueue_style('animate-css', 'https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css', array(), '4.1.1');
+	// Enqueue GSAP core library
+	wp_enqueue_script('gsap-js', 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js', array(), '3.11.4', true);
+
+	// Enqueue GSAP ScrollTrigger plugin
+	wp_enqueue_script('gsap-scrolltrigger', 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js', array('gsap-js'), '3.11.4', true);
+
+	// Enqueue your custom GSAP animation script
+	wp_enqueue_script('my-custom-plugin-gsap-animations', plugin_dir_url(__FILE__) . 'gsap-animations.js', array('gsap-js', 'gsap-scrolltrigger'), '1.0', true);
 }
-add_action('enqueue_block_editor_assets', 'my_custom_plugin_enqueue_styles');
-add_action('wp_enqueue_scripts', 'my_custom_plugin_enqueue_styles');
+add_action('wp_enqueue_scripts', 'my_custom_plugin_enqueue_scripts');
