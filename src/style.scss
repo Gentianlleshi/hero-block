@@ -39,3 +39,11 @@
 	/* Apply custom fill mode */
 	animation-fill-mode: var(--animate-fill-mode, both);
 }
+
+/* custom-animations.css */
+.animate__animated {
+  /* Apply custom easing if needed */
+  animation-timing-function: var(--animate-easing, ease);
+  /* Apply custom fill mode */
+  animation-fill-mode: var(--animate-fill-mode, both);
+}
